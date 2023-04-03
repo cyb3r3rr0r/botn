@@ -21,6 +21,8 @@
   #import
   
   
+  //string TradeComment = "ATLANTIC TRADING";
+  //string Ordercomment="ATLANTIC TRADING";
   int Slippage=3;
   
   int    Retries=10;
@@ -139,8 +141,15 @@
   //+------------------------------------------------------------------+
   void OnDeinit(const int reason)
     {
-    
-    
+    /*
+     for(int ui = ObjectsTotal() - 1; ui >= 0; ui--)
+     {
+      string name2 = ObjectName(ui);
+       if(StringFind(name2, "klc", 0) != -1)
+         ObjectDelete(name2);   
+         }
+     */
+     //ChartRedraw();
     }
   //+------------------------------------------------------------------+
   //| Expert tick function                                             |
@@ -763,6 +772,154 @@
   
     }
   //+------------------------------------------------------------------+
+  string CandleStick_Analyzer()
+    {
+     RefreshRates();
+     string CandleStick, Comment1="",Comment2="",Comment3="",Comment4="",Comment5="",Comment6="",Comment7="",Comment8="",Comment9="";
+  
+     if(BullishEngulfingExists())
+        Comment1 =" Bullish Engulfing ";
+     if(BullishHaramiExists())
+        Comment2 =" Bullish Harami ";
+     if(LongUpCandleExists())
+        Comment3 =" Bullish LongUp ";
+     if(DojiAtBottomExists())
+        Comment4 =" MorningStar Doji ";
+  
+     if(DojiAtTopExists())
+        Comment5 =" EveningStar Doji ";
+     if(BearishHaramiExists())
+        Comment6 =" Bearish Harami ";
+     if(BearishEngulfingExists())
+        Comment7 =" Bearish Engulfing ";
+     if(LongDownCandleExists())
+        Comment8 =" Bearish LongDown ";
+  
+     /*if(SpinningTopExists())
+        Comment9 =" Spinning Top ";*/
+  
+     CandleStick =Comment1+Comment2+Comment3+Comment4+Comment5+Comment6+Comment7+Comment8+Comment9;
+     return (CandleStick);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool BullishEngulfingExists()
+    {
+     if(Open[1] <= Close[2] && Close[1] >= Open[2] && Open[2] -  Close[2] >= 10*Point && Close[1] - Open[1] >= 10*Point)
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool BullishHaramiExists()
+    {
+     if(Close[2] < Open[2] && Open[1] < Close[1] && Open[2] - Close[2] > iATR(NULL, 0, 14, 2) && Open[2] - Close[2] > 4*(Close[1] - Open[1]))
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool DojiAtBottomExists()
+    {
+     if(Open[3] - Close[3] >= 8*Point && MathAbs(Close[2] - Open[2]) <= 1*Point && Close[1] - Open[1] >= 8*Point)
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool DojiAtTopExists()
+    {
+     if(Close[3] - Open[3] >= 8*Point && MathAbs(Close[2] - Open[2]) <= 1*Point && Open[1] - Close[1] >= 8*Point)
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool BearishHaramiExists()
+    {
+     if(Close[2] > Close[1] && Open[2] < Open[1] && Close[2] > Open[2] && Open[1] > Close[1] && Close[2] -  Open[2] > iATR(NULL, 0, 14, 2) && Close[2] -  Open[2] > 4*(Open[1] -  Close[1]))
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool LongUpCandleExists()
+    {
+     if(Open[2] < Close[2] && High[2] - Low[2] >= 40*Point && High[2] - Low[2] > 2.5*iATR(NULL, 0, 14, 2) && Close[1] < Open[1] && Open[1] -  Close[1] > 10*Point)
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool LongDownCandleExists()
+    {
+     if(Open[1] > Close[1] && High[1] -Low[1] >= 40*Point && High[1] - Low[1] > 2.5*iATR(NULL, 0, 14, 1))
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  bool BearishEngulfingExists()
+    {
+     if(Open[1] >= Close[2] && Close[1] <= Open[2] && Open[2] -Close[2] >= 10*Point && Close[1]- Open[1] >= 10*Point)
+        return (true);
+     return (false);
+    }
+  
+  //+------------------------------------------------------------------+
+  //|                                                                  |
+  //+------------------------------------------------------------------+
+  /*bool SpinningTopExists()
+    {
+     HideTestIndicators(true);
+     if(High[1] - Low[1] > 1.5*iATR(NULL, 0, 14, 1))
+        Print("ST Condition 1 Met");
+     if(MathAbs(Open[1] - Close[1])*5 < High[1] - Low[1])
+        Print("ST Condition 2 Met");
+     if(High[1] - Low[1] > 1.5*iATR(NULL, 0, 14, 1) && (High[1] - Low[1] > 30*Point) && MathAbs(Open[1] - Close[1])*5 < High[1]- Low[1])
+        return (true);
+     HideTestIndicators(false);
+     return (false);
+    }*/
+  //+------------------------------------------------------------------+
+  void MakeLine(double price)
+    {
+     string name="level";
+  
+     if(price>iOpen(Symbol(),PERIOD_M1,0))
+        Comment("BUY = "+DoubleToStr(price,Digits));
+     if(price<iOpen(Symbol(),PERIOD_M1,0))
+        Comment("SELL= "+DoubleToStr(price,Digits));
+  
+     if(ObjectFind(name)!=-1)
+       {
+        ObjectMove(name,0,iTime(Symbol(),PERIOD_M1,0),price);
+        return;
+       }
+     ObjectCreate(name,OBJ_HLINE,0,0,price);
+     ObjectSet(name,OBJPROP_COLOR,clrAqua);
+     ObjectSet(name,OBJPROP_STYLE,STYLE_SOLID);
+     ObjectSet(name,OBJPROP_WIDTH,2);
+     ObjectSet(name,OBJPROP_BACK,TRUE);
+    }
+  //+------------------------------------------------------------------+
+  //+------------------------------------------------------------------+
   //| User function IsPinbar                                           |
   //+------------------------------------------------------------------+
   bool IsBuyPinbar()
@@ -777,6 +934,7 @@
      preCl=Close[2];
      preHi=High[2];
      preLo=Low[2];
+  //SetProxy(preHi,preLo,preOp,preCl);//Check proxy
      actRange=actHi-actLo;
      preRange=preHi-preLo;
      actHigherPart=actHi-actRange*0.4;//helping variable to not have too much counting in IF part
@@ -786,6 +944,7 @@
      double dayRange=AveRange4();
      if((actCl>actHigherPart1&&actOp>actHigherPart)&&  //Close&Open of PB is in higher 1/3 of PB
         (actRange>dayRange*0.5)&& //PB is not too small
+  //(actHi<(preHi-preRange*0.3))&& //High of PB is NOT higher than 1/2 of previous Bar
         (actLo+actRange*0.25<preLo)) //Nose of the PB is at least 1/3 lower than previous bar
        {
   
@@ -824,6 +983,7 @@
      double dayRange=AveRange4();
      if((actCl<actLowerPart1&&actOp<actLowerPart)&&  //Close&Open of PB is in higher 1/3 of PB
         (actRange>dayRange*0.5)&& //PB is not too small
+  //(actLo>(preLo+preRange/3.0))&& //Low of PB is NOT lower than 1/2 of previous Bar
         (actHi-actRange*0.25>preHi)) //Nose of the PB is at least 1/3 lower than previous bar
   
        {
