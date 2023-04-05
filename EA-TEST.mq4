@@ -54,13 +54,9 @@ input string    separate_2 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
 extern bool     BUYOPEN = true;              // Turn BUY on?
 extern bool     SELLOPEN = true;              // Turn SELL on?
-
-input string    separate_3 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-input string    tx02       = "Configuración del TRAILING";
-input string    separate_4 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
-
-
+input string    separate_3 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
 extern int    MaxOrders = 20; //Maxímo de Ordenes
+input string    separate_3 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
 extern double MaxSpread = 20;
 double Gd_188;
 //+------------------------------------------------------------------+
@@ -721,6 +717,4 @@ double AveRange4()
   return (sum/4.0);//make average, don't count min and max, this is why I divide by 4 and not by 6
  }
  
- 
 //+------------------------------------------------------------------+
-
