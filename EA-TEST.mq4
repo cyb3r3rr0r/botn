@@ -716,5 +716,5 @@ double AveRange4()
     } 
   return (sum/4.0);//make average, don't count min and max, this is why I divide by 4 and not by 6
  }
- 
+
 //+------------------------------------------------------------------+
