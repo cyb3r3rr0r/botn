@@ -56,7 +56,7 @@ extern bool     BUYOPEN = true;              // Turn BUY on?
 extern bool     SELLOPEN = true;              // Turn SELL on?
 input string    separate_3 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
 extern int    MaxOrders = 20; //Maxímo de Ordenes
-input string    separate_3 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
+input string    separate_4 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
 extern double MaxSpread = 20;
 double Gd_188;
 //+------------------------------------------------------------------+
