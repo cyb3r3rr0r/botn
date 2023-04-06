@@ -40,7 +40,7 @@ input string   lb_1              = "";                   // ------> PANEL SETTIN
 extern bool    ShowPanel         = true;                 // Show panel
 extern bool    AllowSubwindow    = false;                // Show Panel in sub window
 extern ENUM_BASE_CORNER Corner   = 2;                    // Panel side
-extern string  PanelTitle="Forex Calendar @ Forex Factory"; // Panel title
+extern string  PanelTitle="Forex Calendar @ Atlantic Trading Academy"; // Panel title
 extern color   TitleColor        = C'46,188,46';         // Title color
 extern bool    ShowPanelBG       = true;                 // Show panel backgroud
 extern color   Pbgc              = C'25,25,25';          // Panel backgroud color
@@ -127,8 +127,8 @@ int OnInit()
    if(Digits%2==1) Factor=10;
    else Factor=1;
 //--- get today time
-   TimeOfDay=(int)TimeLocal()%86400;
-   Midnight=TimeLocal()-TimeOfDay;
+   TimeOfDay=(int)TimeCurrent()%86400;
+   Midnight=TimeCurrent()-TimeOfDay;
 //--- set xml file name ffcal_week_this (fixed name)
    xmlFileName=INAME+"-ffcal_week_this.xml";
 //--- checks the existence of the file.
@@ -144,7 +144,7 @@ int OnInit()
 //--- check for updates
    if(AllowUpdates)
      {
-      if(xmlModifed<TimeLocal()-(UpdateHour*3600))
+      if(xmlModifed<TimeCurrent()-(UpdateHour*3600))
         {
          Print(INAME+": xml file is out of date");
          xmlUpdate();
@@ -343,7 +343,7 @@ void xmlDownload()
   {
 //---
    ResetLastError();
-   string sUrl="https://nfs.faireconomy.media/ff_calendar_thisweek.xml";
+   string sUrl="https://nfs.faireconomy.media/ff_calendar_thisweek.xml?version=7e37b4505ce4a527b8ea92e7b41c1f64";
    string FilePath=StringConcatenate(TerminalInfoString(TERMINAL_DATA_PATH),"\\MQL4\\files\\",xmlFileName);
    int FileGet=URLDownloadToFileW(NULL,sUrl,FilePath,0,NULL);
    if(FileGet==0) PrintFormat(INAME+": %s file downloaded successfully!",xmlFileName);
