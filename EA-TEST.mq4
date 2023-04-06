@@ -1,10 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                          AtlanticTrading_MOD.mq4 |
-//|                         Copyright 2020, MetaQuotes Software Corp.|
+//|                         Copyright 2023, MetaQuotes Software Corp.|
 //|                                                                  |
 //+------------------------------------------------------------------+
 #property description "Atlantic Trading Academy, AtlanticTrading_MOD"
-#property copyright "Copyright 2020, MetaQuotes Software Corp."
+#property copyright "Copyright 2023, MetaQuotes Software Corp."
 #property link "atlantictradingacademy@gmail.com"
 #property version "6.00"
 #property strict
@@ -39,8 +39,6 @@ int ccc = 11520763; //CUENTA DE CLIENTE
 int ccc1 = 72378; //CUENTA DE CLIENTE
 
 //+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 
 int MagicID=10101988;
 input double LOTS=0.50;
@@ -50,18 +48,31 @@ input double TP=30;
 
 input string    separate_1 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 input string    tx01       = "Configuración del COMPRA Y VENTA";
-input string    separate_2 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-
 extern bool     BUYOPEN = true;              // Turn BUY on?
 extern bool     SELLOPEN = true;              // Turn SELL on?
+input string    separate_2 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
+input string    tx02       = "Configuración de INDICADORES";
+input int EMA_Period = 89; // Período de la EMA
 input string    separate_3 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
-extern int    MaxOrders = 20; //Maxímo de Ordenes
+input string    tx03       = "Configuración del HORARIO";
+input int TradingStartHour = 8; // Hora de inicio de la sesión de trading (en horas)
+input int TradingEndHour = 17; // Hora de finalización de la sesión de trading (en horas)
 input string    separate_4 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
-extern double MaxSpread = 20;
+input string    tx04       = "Configuración del NOTICIAS";
+input bool EnableNewsFilter = false; // Habilitar o deshabilitar el filtro de noticias
+string FFCIndicatorName = "FFC"; // Nombre del indicador FFC
+int FFCBufferIndex = 0; // Índice del búfer de datos del indicador FFC
+input int MinutesBeforeNews = 20; // Tiempo de bloqueo antes de las noticias (en minutos)
+input int MinutesAfterNews = 20; // Tiempo de bloqueo después de las noticias (en minutos)
+input string    separate_5 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
+input string    tx05       = "Configuración de las Ordenes Máxima";
+extern int    MaxOrders = 10; //Maxímo de Ordenes
+input string    separate_6 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";  
+extern double MaxSpread = 5;
 double Gd_188;
+
 //+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
+
 union Price
    {
       uchar buffer[8];
@@ -130,79 +141,108 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnTick()
  {
-    
-  static datetime previousBar;
-  if(previousBar!=Time[0])
-    {
-     previousBar=Time[0];
-     ChartRedraw();
-    }
-  else
-    {
-     return;
-    }
+   // Obtiene la hora actual de la PC
+   datetime localTime = TimeLocal();
+   int currentHour = TimeHour(localTime);
 
-  if(iVolume(Symbol(),PERIOD_H4,0)>iVolume(Symbol(),PERIOD_H4,1))
-     return;
+   // Verifica si la hora actual está dentro del rango de horas de trading
+   if (currentHour >= TradingStartHour && currentHour <= TradingEndHour)
+   {
+    if (!isNewsTime())
+      {
+      
+      double emaCurrent = EMA(EMA_Period);
+      double bid = NormalizeDouble(SymbolInfoDouble(_Symbol, SYMBOL_BID), _Digits);
+      double ask = NormalizeDouble(SymbolInfoDouble(_Symbol, SYMBOL_ASK), _Digits);
+
+      // Verifica si la posición actual está por encima o por debajo de la EMA
+      bool aboveEMA = bid > emaCurrent;
+      bool belowEMA = ask < emaCurrent;
+      
+      static datetime previousBar;
+      if(previousBar!=Time[0])
+       {
+        previousBar=Time[0];
+        ChartRedraw();
+       }
+      else
+       {
+        return;
+       }
+      
+      if(iVolume(Symbol(),PERIOD_H4,0)>iVolume(Symbol(),PERIOD_H4,1))
+        return;
 //**********************************
 
-  if(!BytesToRead>0)
-     return;
-
-  int pos = -1 ;
-  for(int i = 0 ; i < BytesToRead - 1 ; i++)
-    {
-     if(!(data[i][0]<Time[0]))
-        break;
-     pos = i + 1;
-    }
+      if(!BytesToRead>0)
+        return;
+      
+      int pos = -1 ;
+      for(int i = 0 ; i < BytesToRead - 1 ; i++)
+       {
+        if(!(data[i][0]<Time[0]))
+           break;
+        pos = i + 1;
+       }
 
 //********************************
 
-  double level=NormalizeDouble(data[pos][1],Digits);
-  ObjectDelete("level");
-  MakeLine(level);
-
-  if(data[pos][1]>Open[0])
-     Comment("H4 ref. Time: ", TimeToString((datetime)data[pos][0]),"\nBUY - ", DoubleToString(data[pos][1]));
-  if(data[pos][1]<Open[0])
-     Comment("H4 ref. Time: ", TimeToString((datetime)data[pos][0]),"\nSELL - ", DoubleToString(data[pos][1]));
-  Gd_188=(Ask-Bid)/g_Point;
-  if(Gd_188>MaxSpread)
-     return;
-
-  if(pos>0)
-    {
-
-     if((CheckMarketBuyOrders() + CheckMarketSellOrders())<MaxOrders)
+      double level=NormalizeDouble(data[pos][1],Digits);
+      ObjectDelete("level");
+      MakeLine(level);
+      
+      if(data[pos][1]>Open[0])
+        Comment("H4 ref. Time: ", TimeToString((datetime)data[pos][0]),"\nBUY - ", DoubleToString(data[pos][1]));
+      if(data[pos][1]<Open[0])
+        Comment("H4 ref. Time: ", TimeToString((datetime)data[pos][0]),"\nSELL - ", DoubleToString(data[pos][1]));
+      Gd_188=(Ask-Bid)/g_Point;
+      if(Gd_188>MaxSpread)
+        return;
+      
+      if(pos>0)
        {
-        if(data[pos][1]>Open[0])
-            if (BUYOPEN == true)
-              if(IsBuyPinbar())
-                {
-                   CloseSell();
-                   double BuySL=NormalizeDouble(Ask - SL*g_Point,Digits);
-                   double BuyTP=NormalizeDouble(Ask + TP*g_Point,Digits);
-                   if(AccountFreeMarginCheck(Symbol(),OP_BUY,GetLots())>0)
-                  {
-                     ticket=OrderSend(Symbol(),OP_BUY,GetLots(),Ask,Slippage,BuySL,BuyTP,NULL,MagicID,0,clrBlue);
-                  }
-                }
-
-        if(data[pos][1]<Open[0])
-            if (SELLOPEN == true)
-              if(IsSellPinbar())
-               {
-                  CloseBuy();
-                  double SellSL=NormalizeDouble(Bid + SL*g_Point,Digits);
-                  double SellTP=NormalizeDouble(Bid - TP*g_Point,Digits);
-                  if(AccountFreeMarginCheck(Symbol(),OP_SELL,GetLots())>0)
-                  {
-                     ticket=OrderSend(Symbol(),OP_SELL,GetLots(),Bid,Slippage,SellSL,SellTP,NULL,MagicID,0,clrRed);
-                  }
-               }
+      
+        if((CheckMarketBuyOrders() + CheckMarketSellOrders())<MaxOrders)
+          {
+          
+          // Lógica de trading existente adaptada para incluir las condiciones de la EMA
+          // Compra en tendencia alcista (por encima de la EMA)
+          if (aboveEMA)
+            {
+          
+              if(data[pos][1]>Open[0])
+                  if (BUYOPEN == true)
+                    if(IsBuyPinbar())
+                      {
+                         CloseSell();
+                         double BuySL=NormalizeDouble(Ask - SL*g_Point,Digits);
+                         double BuyTP=NormalizeDouble(Ask + TP*g_Point,Digits);
+                         if(AccountFreeMarginCheck(Symbol(),OP_BUY,GetLots())>0)
+                        {
+                           ticket=OrderSend(Symbol(),OP_BUY,GetLots(),Ask,Slippage,BuySL,BuyTP,NULL,MagicID,0,clrBlue);
+                        }
+                      }
+            }
+           // Vende en tendencia bajista (por debajo de la EMA)
+           if (belowEMA)
+            {
+              if(data[pos][1]<Open[0])
+                  if (SELLOPEN == true)
+                    if(IsSellPinbar())
+                     {
+                        CloseBuy();
+                        double SellSL=NormalizeDouble(Bid + SL*g_Point,Digits);
+                        double SellTP=NormalizeDouble(Bid - TP*g_Point,Digits);
+                        if(AccountFreeMarginCheck(Symbol(),OP_SELL,GetLots())>0)
+                        {
+                           ticket=OrderSend(Symbol(),OP_SELL,GetLots(),Bid,Slippage,SellSL,SellTP,NULL,MagicID,0,clrRed);
+                        }
+                     }
+            }
+          }
        }
-    }
+     }
+  }
   return;
  }
 //+------------------------------------------------------------------+
@@ -283,6 +323,7 @@ void ReadFileHst(string FileName)
   strFileContents=DoubleToString(data[j-1][0],3)+" "+DoubleToString(data[j-1][1],8)+" "+DoubleToString(data[j-2][1],3)+" "+DoubleToString(data[j-2][1],8);
   result=strFileContents;
  }
+ 
 //ReadFileHst <<==--------   --------
 
 int fnGetLotDigit()
@@ -306,9 +347,6 @@ int CheckBuyOrders(int magic)
   int op=0;
 
   for(int i=OrdersTotal()-1; i>=0; i--)
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
     {
      int status=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
      if(OrderMagicNumber()!=magic)
@@ -332,9 +370,6 @@ int CheckSellOrders(int magic)
   int op=0;
 
   for(int i=OrdersTotal()-1; i>=0; i--)
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
     {
      int status=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
      if(OrderMagicNumber()!=magic)
@@ -358,9 +393,6 @@ int CheckTotalBuyOrders(int magic)
   int op=0;
 
   for(int i=OrdersTotal()-1; i>=0; i--)
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
     {
      int status=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
      if(OrderMagicNumber()!=magic)
@@ -383,9 +415,6 @@ int CheckTotalSellOrders(int magic)
   int op=0;
 
   for(int i=OrdersTotal()-1; i>=0; i--)
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
     {
      int status=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
      if(OrderMagicNumber()!=magic)
@@ -408,9 +437,6 @@ int CheckMarketSellOrders()
   int op=0;
 
   for(int i=OrdersTotal()-1; i>=0; i--)
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
     {
      int status=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
      if(OrderMagicNumber()!=MagicID)
@@ -433,9 +459,6 @@ int CheckMarketBuyOrders()
   int op=0;
 
   for(int i=OrdersTotal()-1; i>=0; i--)
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
     {
      int status=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
      if(OrderMagicNumber()!=MagicID)
@@ -464,18 +487,12 @@ bool MainOrders(int a_cmd_0,double price_24,double price_TP,double price_SL)
      cmd=0;
   if(a_cmd_0 ==OP_SELL||a_cmd_0 ==OP_SELLSTOP)
      cmd=1;
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
   if(a_cmd_0==OP_BUYLIMIT || a_cmd_0==OP_BUY)
     {
      color_8=Blue;
     }
   else
     {
-     //+------------------------------------------------------------------+
-     //|                                                                  |
-     //+------------------------------------------------------------------+
      if(a_cmd_0==OP_SELLLIMIT || a_cmd_0==OP_SELL)
        {
         color_8=Red;
@@ -655,8 +672,6 @@ bool IsBuyPinbar()
  }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 bool IsSellPinbar()
  {
 //start of declarations
@@ -716,5 +731,51 @@ double AveRange4()
     } 
   return (sum/4.0);//make average, don't count min and max, this is why I divide by 4 and not by 6
  }
+
+
+//+------------------------------------------------------------------+
+//| Función para verificar si hay noticias en el tiempo especificado |
+//+------------------------------------------------------------------+
+bool isNewsTime()
+{
+    if (EnableNewsFilter)
+    {
+        datetime currentTime = TimeCurrent();
+
+        for (int i = 0; i < Bars; i++)
+        {
+            double newsValue = iCustom(Symbol(), PERIOD_M1, FFCIndicatorName, FFCBufferIndex, i);
+
+            if (newsValue != 0.0) // Solo comprueba eventos de impacto medio y alto
+            {
+                datetime eventTime = Time[i];
+
+                // Verifica si el evento está dentro del rango de tiempo especificado
+                if (eventTime >= currentTime - (MinutesBeforeNews * 60) && eventTime <= currentTime + (MinutesAfterNews * 60))
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+//+------------------------------------------------------------------+
+//| Función del Indicador Media Móvil Exponencial                    |
+//+------------------------------------------------------------------+
+
+double EMA(int period, int shift = 0)
+{
+    string symbol = _Symbol;
+    int timeframe = _Period;
+    string indicatorName = "EMA";
+    double emaValue = iMA(symbol, timeframe, period, 0, MODE_EMA, PRICE_CLOSE, shift);
+    return emaValue;
+}
+
+
+
 
 //+------------------------------------------------------------------+
